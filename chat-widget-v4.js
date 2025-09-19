@@ -22,7 +22,7 @@
             right: 32px;
             width: 72px;
             height: 72px;
-            border-radius: 50%;
+            border-radius: 0%;
             background: linear-gradient(135deg, var(--chat--color-primary) 0%, var(--chat--color-secondary) 100%);
             color: white;
             border: none;
