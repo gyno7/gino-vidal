@@ -19,7 +19,7 @@
             width: 380px;
             height: 600px;
             background: var(--chat--color-background);
-            border-radius: 0px;
+            border-radius: 12px;
             box-shadow: 0 8px 32px rgba(133, 79, 255, 0.15);
             border: 1px solid rgba(133, 79, 255, 0.2);
             overflow: hidden;
@@ -336,7 +336,7 @@
             welcomeText: '',
             responseTimeText: '',
             poweredBy: {
-                text: 'Powered by Gino',
+                text: 'Powered by Mad',
                 link: 'https://n8n.partnerlinks.io/m8a94i19zhqq?utm_source=nocodecreative.io'
             }
         },
