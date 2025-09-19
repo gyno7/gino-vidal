@@ -1,4 +1,4 @@
-<script>
+
 // Chat Widget Script
 (function() {
     // --- SESSION ID PERSISTENCE ---
@@ -219,4 +219,3 @@
     });
 
 })();
-</script>
