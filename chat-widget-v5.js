@@ -1,5 +1,58 @@
 // Chat Widget Script
-(function() {
+(
+    // Persist session across reloads
+function getSessionId() {
+    let sessionId = localStorage.getItem("n8nChatSessionId");
+    if (!sessionId) {
+        sessionId = crypto.randomUUID();
+        localStorage.setItem("n8nChatSessionId", sessionId);
+    }
+    return sessionId;
+}
+const currentSessionId = getSessionId();
+
+// Load saved messages from localStorage
+const savedMessages = JSON.parse(localStorage.getItem("n8nChatHistory") || "[]");
+savedMessages.forEach(m => {
+    const div = document.createElement("div");
+    div.className = `chat-message ${m.sender}`;
+    div.textContent = m.text;
+    messagesContainer.appendChild(div);
+});
+messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+function saveMessage(sender, text) {
+    const history = JSON.parse(localStorage.getItem("n8nChatHistory") || "[]");
+    history.push({ sender, text });
+    localStorage.setItem("n8nChatHistory", JSON.stringify(history));
+}
+
+if (message) {
+    const userMessageDiv = document.createElement('div');
+    userMessageDiv.className = 'chat-message user';
+    userMessageDiv.textContent = message;
+    messagesContainer.appendChild(userMessageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    saveMessage("user", message);
+
+    textarea.value = '';
+
+    // TODO: send to n8n webhook
+}
+saveMessage("bot", replyText);
+const endButton = document.createElement("button");
+endButton.textContent = "End Chat";
+endButton.style.marginLeft = "auto";
+brandHeader.appendChild(endButton);
+
+endButton.addEventListener("click", () => {
+    localStorage.removeItem("n8nChatSessionId");
+    localStorage.removeItem("n8nChatHistory");
+    messagesContainer.innerHTML = "";
+    alert("Conversation ended. Next message will start fresh.");
+});
+
+function() {
     // Create and inject styles
     const styles = `
         .n8n-chat-widget {
