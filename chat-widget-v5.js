@@ -1,56 +1,99 @@
 // Chat Widget Script
 (
-    // Persist session across reloads
-function getSessionId() {
-    let sessionId = localStorage.getItem("n8nChatSessionId");
-    if (!sessionId) {
-        sessionId = crypto.randomUUID();
-        localStorage.setItem("n8nChatSessionId", sessionId);
+  // Chat Widget Script
+(function() {
+    // --- SESSION ID PERSISTENCE ---
+    function getSessionId() {
+        let sessionId = localStorage.getItem("n8nChatSessionId");
+        if (!sessionId) {
+            sessionId = crypto.randomUUID();
+            localStorage.setItem("n8nChatSessionId", sessionId);
+        }
+        return sessionId;
     }
-    return sessionId;
-}
-const currentSessionId = getSessionId();
+    let currentSessionId = getSessionId();
 
-// Load saved messages from localStorage
-const savedMessages = JSON.parse(localStorage.getItem("n8nChatHistory") || "[]");
-savedMessages.forEach(m => {
-    const div = document.createElement("div");
-    div.className = `chat-message ${m.sender}`;
-    div.textContent = m.text;
-    messagesContainer.appendChild(div);
-});
-messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // --- STYLES, CONFIG, AND CONTAINER CREATION ---
+    // ... (all your style and widget setup code here, unchanged) ...
 
-function saveMessage(sender, text) {
-    const history = JSON.parse(localStorage.getItem("n8nChatHistory") || "[]");
-    history.push({ sender, text });
-    localStorage.setItem("n8nChatHistory", JSON.stringify(history));
-}
+    // After you create messagesContainer:
+    const messagesContainer = chatContainer.querySelector('.chat-messages');
 
-if (message) {
-    const userMessageDiv = document.createElement('div');
-    userMessageDiv.className = 'chat-message user';
-    userMessageDiv.textContent = message;
-    messagesContainer.appendChild(userMessageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    saveMessage("user", message);
+    // --- CHAT HISTORY PERSISTENCE ---
+    function saveMessage(sender, text) {
+        const history = JSON.parse(localStorage.getItem("n8nChatHistory") || "[]");
+        history.push({ sender, text });
+        localStorage.setItem("n8nChatHistory", JSON.stringify(history));
+    }
 
-    textarea.value = '';
+    function loadMessages() {
+        const savedMessages = JSON.parse(localStorage.getItem("n8nChatHistory") || "[]");
+        savedMessages.forEach(m => {
+            const div = document.createElement("div");
+            div.className = `chat-message ${m.sender}`;
+            div.textContent = m.text;
+            messagesContainer.appendChild(div);
+        });
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    loadMessages();
 
-    // TODO: send to n8n webhook
-}
-saveMessage("bot", replyText);
-const endButton = document.createElement("button");
-endButton.textContent = "End Chat";
-endButton.style.marginLeft = "auto";
-brandHeader.appendChild(endButton);
+    // --- SEND MESSAGE LOGIC ---
+    async function sendMessage(message) {
+        // Display user message
+        const userMessageDiv = document.createElement('div');
+        userMessageDiv.className = 'chat-message user';
+        userMessageDiv.textContent = message;
+        messagesContainer.appendChild(userMessageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        saveMessage("user", message);
 
-endButton.addEventListener("click", () => {
-    localStorage.removeItem("n8nChatSessionId");
-    localStorage.removeItem("n8nChatHistory");
-    messagesContainer.innerHTML = "";
-    alert("Conversation ended. Next message will start fresh.");
-});
+        // Send to n8n
+        const messageData = {
+            action: "sendMessage",
+            sessionId: currentSessionId,
+            chatInput: message,
+        };
+
+        try {
+            const response = await fetch(config.webhook.url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(messageData)
+            });
+            const data = await response.json();
+            const botResponse = Array.isArray(data) ? data[0].output : data.output;
+
+            const botMessageDiv = document.createElement('div');
+            botMessageDiv.className = 'chat-message bot';
+            botMessageDiv.textContent = botResponse;
+            messagesContainer.appendChild(botMessageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            saveMessage("bot", botResponse);
+
+        } catch (err) {
+            console.error("Error:", err);
+        }
+    }
+
+    // --- END CHAT BUTTON ---
+    const endButton = document.createElement("button");
+    endButton.textContent = "End Chat";
+    endButton.style.marginLeft = "auto";
+    chatContainer.querySelector('.brand-header').appendChild(endButton);
+
+    endButton.addEventListener("click", () => {
+        localStorage.removeItem("n8nChatSessionId");
+        localStorage.removeItem("n8nChatHistory");
+        messagesContainer.innerHTML = "";
+        alert("Conversation ended. Next message will start fresh.");
+        currentSessionId = getSessionId(); // start new session
+    });
+
+    // hook up textarea + sendButton → sendMessage(message)
+    // ...
+})();
+
 
 function() {
     // Create and inject styles
