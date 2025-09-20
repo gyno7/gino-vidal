@@ -312,6 +312,79 @@
             }
         }
     `;
+const isLoggedIn = window.isLoggedIn === true || window.isLoggedIn === "true";
+const userData = window.userData || { name: "", email: "", phone: "" };
+
+let newConversationHTML;
+
+if (isLoggedIn) {
+    newConversationHTML = `
+        <div class="brand-header">
+            <img src="${config.branding.logo}" alt="${config.branding.name}">
+            <span>${config.branding.name}</span>
+            <button class="close-button">×</button>
+        </div>
+        <div class="new-conversation">
+            <h2 class="welcome-text">${config.branding.welcomeText}</h2>
+            <form id="chat-user-form" class="chat-user-form">
+                <input type="text" name="name" value="${userData.name}" placeholder="Name" required />
+                <input type="email" name="email" value="${userData.email}" placeholder="Email" required />
+                <input type="tel" name="phone" value="${userData.phone}" placeholder="Phone" required />
+                <button type="submit" class="new-chat-btn">Start Chat</button>
+            </form>
+            <p class="response-text">${config.branding.responseTimeText}</p>
+        </div>
+    `;
+} else {
+    newConversationHTML = `
+        <div class="brand-header">
+            <img src="${config.branding.logo}" alt="${config.branding.name}">
+            <span>${config.branding.name}</span>
+            <button class="close-button">×</button>
+        </div>
+        <div class="new-conversation">
+            <h2 class="welcome-text">${config.branding.welcomeText}</h2>
+            <div id="guest-options">
+                <button id="continue-guest" class="new-chat-btn">Continue as Guest</button>
+                <button id="register-btn" class="new-chat-btn" style="background:#444;">Register / Sign In</button>
+            </div>
+            <form id="guest-form" class="chat-user-form" style="display:none;">
+                <input type="text" name="name" placeholder="Name" required />
+                <input type="email" name="email" placeholder="Email" required />
+                <input type="tel" name="phone" placeholder="Phone" required />
+                <button type="submit" class="new-chat-btn">Start Chat</button>
+            </form>
+            <p class="response-text">${config.branding.responseTimeText}</p>
+        </div>
+    `;
+}
+// Handle forms
+chatContainer.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (e.target.id === "chat-user-form" || e.target.id === "guest-form") {
+        const formData = new FormData(e.target);
+        const userDetails = Object.fromEntries(formData.entries());
+        console.log("User Details:", userDetails);
+
+        // Start chat after form submit
+        startNewConversation();
+    }
+});
+
+const guestBtn = chatContainer.querySelector("#continue-guest");
+if (guestBtn) {
+    guestBtn.addEventListener("click", () => {
+        chatContainer.querySelector("#guest-options").style.display = "none";
+        chatContainer.querySelector("#guest-form").style.display = "block";
+    });
+}
+
+const registerBtn = chatContainer.querySelector("#register-btn");
+if (registerBtn) {
+    registerBtn.addEventListener("click", () => {
+        window.location.href = "/account/register"; // Shopify register page
+    });
+}
 
     // Load Geist font
     const fontLink = document.createElement('link');
@@ -462,23 +535,7 @@
     const chatContainer = document.createElement('div');
     chatContainer.className = `chat-container${config.style.position === 'left' ? ' position-left' : ''}`;
     
-    const newConversationHTML = `
-        <div class="brand-header">
-            <img src="${config.branding.logo}" alt="${config.branding.name}">
-            <span>${config.branding.name}</span>
-            <button class="close-button">×</button>
-        </div>
-        <div class="new-conversation">
-            <h2 class="welcome-text">${config.branding.welcomeText}</h2>
-            <button class="new-chat-btn">
-                <svg class="message-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/>
-                </svg>
-                Send us a message
-            </button>
-            <p class="response-text">${config.branding.responseTimeText}</p>
-        </div>
-    `;
+   
 
     const chatInterfaceHTML = `
         <div class="chat-interface">
