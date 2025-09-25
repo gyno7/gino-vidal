@@ -625,7 +625,7 @@
                 </div>
                 <div class="form-field">
                     <label class="form-label" for="chat-user-phone">Phone Number</label>
-                    <input type="tel" id="chat-user-phone" class="form-input" placeholder="Your Phone Number address" required>
+                    <input type="tel" id="chat-user-phone" class="form-input" placeholder="Your Phone Number" required>
                     <div class="error-text" id="phone-error"></div>
                 </div>
                 <button type="submit" class="submit-registration">Continue to Chat</button>
@@ -901,9 +901,10 @@
         isWaitingForResponse = true;
         
         // Get user info if available
-        const email = nameInput ? nameInput.value.trim() : "";
-        const name = emailInput ? emailInput.value.trim() : "";
+        const name = nameInput ? nameInput.value.trim() : "";
+        const email = emailInput ? emailInput.value.trim() : "";
         const phone = phoneInput ? phoneInput.value.trim() : "";
+
 
         
         const requestData = {
