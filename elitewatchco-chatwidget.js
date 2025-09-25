@@ -625,7 +625,7 @@
                 </div>
                 <div class="form-field">
                     <label class="form-label" for="chat-user-phone">Phone Number</label>
-                    <input type="phone" id="chat-user-phone" class="form-input" placeholder="Your Phone Number address" required>
+                    <input type="tel" id="chat-user-phone" class="form-input" placeholder="Your Phone Number address" required>
                     <div class="error-text" id="phone-error"></div>
                 </div>
                 <button type="submit" class="submit-registration">Continue to Chat</button>
@@ -726,11 +726,11 @@
         return emailRegex.test(email);
     }
 
-    // Validate Phone format
     function isValidPhone(phone) {
-    const phoneRegex = /^\d+$/;
+    const phoneRegex = /^\+?[0-9\s\-]{7,15}$/;
     return phoneRegex.test(phone);
 }
+
 
     // Handle registration form submission
     async function handleRegistration(event) {
@@ -773,8 +773,8 @@
             phoneInput.classList.add('error');
             isValid = false;
         } else if (!isValidPhone(phone)) {
-            PhoneError.textContent = 'Please enter a valid phone address';
-            PhoneInput.classList.add('error');
+            phoneError.textContent = 'Please enter a valid phone address';
+            phoneInput.classList.add('error');
             isValid = false;
         }
         
