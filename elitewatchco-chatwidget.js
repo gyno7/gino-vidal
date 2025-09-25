@@ -623,6 +623,11 @@
                     <input type="email" id="chat-user-email" class="form-input" placeholder="Your email address" required>
                     <div class="error-text" id="email-error"></div>
                 </div>
+                <div class="form-field">
+                    <label class="form-label" for="chat-user-phone">Phone Number</label>
+                    <input type="phone" id="chat-user-phone" class="form-input" placeholder="Your Phone Number address" required>
+                    <div class="error-text" id="phone-error"></div>
+                </div>
                 <button type="submit" class="submit-registration">Continue to Chat</button>
             </form>
         </div>
@@ -676,8 +681,10 @@
     const chatWelcome = chatWindow.querySelector('.chat-welcome');
     const nameInput = chatWindow.querySelector('#chat-user-name');
     const emailInput = chatWindow.querySelector('#chat-user-email');
+    const phoneInput = chatWindow.querySelector('#chat-user-phone');
     const nameError = chatWindow.querySelector('#name-error');
     const emailError = chatWindow.querySelector('#email-error');
+    const phoneError = chatWindow.querySelector('#phone-error');
 
     // Helper function to generate unique session ID
     function createSessionId() {
@@ -719,6 +726,12 @@
         return emailRegex.test(email);
     }
 
+    // Validate Phone format
+    function isValidPhone(phone) {
+    const phoneRegex = /^\d+$/;
+    return phoneRegex.test(phone);
+}
+
     // Handle registration form submission
     async function handleRegistration(event) {
         event.preventDefault();
@@ -726,12 +739,15 @@
         // Reset error messages
         nameError.textContent = '';
         emailError.textContent = '';
+        phoneError.textContent = '';
         nameInput.classList.remove('error');
         emailInput.classList.remove('error');
+        phoneInput.classList.remove('error');
         
         // Get values
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
+        const phone = phoneInput.value.trim();
         
         // Validate
         let isValid = true;
@@ -751,6 +767,16 @@
             emailInput.classList.add('error');
             isValid = false;
         }
+
+        if (!phone) {
+            phoneError.textContent = 'Please enter your phone number';
+            phoneInput.classList.add('error');
+            isValid = false;
+        } else if (!isValidPhone(phone)) {
+            PhoneError.textContent = 'Please enter a valid phone address';
+            PhoneInput.classList.add('error');
+            isValid = false;
+        }
         
         if (!isValid) return;
         
@@ -764,7 +790,8 @@
             route: settings.webhook.route,
             metadata: {
                 userId: email,
-                userName: name
+                userName: name,
+                userPhone: phone,
             }
         }];
 
@@ -789,7 +816,7 @@
             const sessionResponseData = await sessionResponse.json();
             
             // Send user info as first message
-            const userInfoMessage = `Name: ${name}\nEmail: ${email}`;
+            const userInfoMessage = `Name: ${name}\nEmail: ${email}\nPhone: ${phone}`;
             
             const userInfoData = {
                 action: "sendMessage",
@@ -799,6 +826,7 @@
                 metadata: {
                     userId: email,
                     userName: name,
+                    userPhone: phone,
                     isUserInfo: true
                 }
             };
@@ -875,6 +903,8 @@
         // Get user info if available
         const email = nameInput ? nameInput.value.trim() : "";
         const name = emailInput ? emailInput.value.trim() : "";
+        const phone = phoneInput ? phoneInput.value.trim() : "";
+
         
         const requestData = {
             action: "sendMessage",
@@ -883,7 +913,8 @@
             chatInput: messageText,
             metadata: {
                 userId: email,
-                userName: name
+                userName: name,
+                userPhone: phone
             }
         };
 
